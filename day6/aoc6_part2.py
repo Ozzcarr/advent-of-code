@@ -21,7 +21,7 @@ def turn_right(direction):
     return turns[direction]
 
 
-def algorithm(map_lines, guard_pos, guard_dir, obstruction=None) -> bool:
+def algorithm(map_lines, guard_pos, guard_dir, obstruction=None) -> tuple[bool, set]:
     seen_states = set()
     width = len(map_lines[0])
     height = len(map_lines)
@@ -41,9 +41,9 @@ def algorithm(map_lines, guard_pos, guard_dir, obstruction=None) -> bool:
             else:
                 guard_dir = turn_right(guard_dir)
         else:
-            return False
+            return False, set(state[0] for state in seen_states)
 
-    return True
+    return True, set(state[0] for state in seen_states)
 
 
 def main():
@@ -51,12 +51,12 @@ def main():
         data = file_data.read()
 
     map_lines, guard_pos, guard_dir = parse_input(data)
+    _, positions = algorithm(map_lines, guard_pos, guard_dir)
 
     total = 0
-    for x in range(len(map_lines)):
-        for y in range(len(map_lines[0])):
-            if map_lines[x][y] != "#" and (x, y) != guard_pos:
-                total += algorithm(map_lines, guard_pos, guard_dir, (x, y))
+    for y, x in positions:
+        if map_lines[x][y] != "#" and (x, y) != guard_pos:
+            total += algorithm(map_lines, guard_pos, guard_dir, (x, y))[0]
 
     print(total)
 
