@@ -7,56 +7,38 @@ def parse_input(input_data: str):
     return [list(map(int, line)) for line in input_data.splitlines()]
 
 
-def is_valid(x, y, rows, cols):
-    return 0 <= x < rows and 0 <= y < cols
-
-
-def dfs(parsed_map, x, y, current_height, rows, cols, visited=None):
-    if not is_valid(x, y, rows, cols) or parsed_map[x][y] != current_height:
+def dfs(parsed_map, x, y, visited=None, current_height=0):
+    if parsed_map[x][y] != current_height:
         return 0
 
     if current_height == 9:
         if visited is not None:
-            visited.add((x, y))
-        return 1
+            if (x, y) not in visited:
+                visited.add((x, y))
+                return 1
+            else:
+                return 0
+        else:
+            return 1
 
-    parsed_map[x][y] = -1
     count = 0
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-        count += dfs(parsed_map, x + dx, y + dy, current_height + 1, rows, cols, visited)
+        if 0 <= x + dx < len(parsed_map) and 0 <= y + dy < len(parsed_map[0]):
+            count += dfs(parsed_map, x + dx, y + dy, visited, current_height + 1)
 
-    parsed_map[x][y] = current_height
     return count
 
 
 def part1(input_data: str):
     """Solve part 1 of the puzzle."""
     parsed_map = parse_input(input_data)
-    rows, cols = len(parsed_map), len(parsed_map[0])
-
-    total_score = 0
-    for i in range(rows):
-        for j in range(cols):
-            if parsed_map[i][j] == 0:
-                visited_nines = set()
-                dfs(parsed_map, i, j, 0, rows, cols, visited_nines)
-                total_score += len(visited_nines)
-
-    return total_score
+    return sum(dfs(parsed_map, i, j, set()) for i in range(len(parsed_map)) for j in range(len(parsed_map[0])))
 
 
 def part2(input_data: str):
     """Solve part 2 of the puzzle."""
     parsed_map = parse_input(input_data)
-    rows, cols = len(parsed_map), len(parsed_map[0])
-
-    total_rating = 0
-    for i in range(rows):
-        for j in range(cols):
-            if parsed_map[i][j] == 0:
-                total_rating += dfs(parsed_map, i, j, 0, rows, cols)
-
-    return total_rating
+    return sum(dfs(parsed_map, i, j) for i in range(len(parsed_map)) for j in range(len(parsed_map[0])))
 
 
 def read_file(filename: str):
